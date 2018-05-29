@@ -6,7 +6,7 @@ Created on Tue Apr 10 17:20:06 2018
 @author: Snigdha Siddula
 Impact of SMOTE and Sample on ML-Classifier's Performace - Occupancy Dataset
 source: https://archive.ics.uci.edu/ml/datasets/Occupancy+Detection+
-Observations: Tree-based algorithms are immune to the SMOTE sampling ratios among the binary classes
+Observations: Tree-based algorithms are immune to the SMOTE sampling ratios among the binary classification
 """
 
 import os
