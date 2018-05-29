@@ -4,7 +4,11 @@
 Created on Wed May 2 12:27:06 2018
 
 @author: Snigdha Siddula
-Impact of Standardization on ML-Classifier's Performance - McKinsey Dataset
+Impact of Standardization on ML-Classifier's Performance - Heart Stroke Risk-factor Analyis
+Recorded time and accuracy with and without standardizing the numerical attributes and following are the observations:
+1. Standardization brings down the convergence time. But this changes as per the ratio of numerical and categorical attributes
+2. Standardization need not necessarily increase the accuracy of the ML-classifier
+3. Standardization significantly helps SVM converge faster
 """
 # import required libraries
 import numpy as np
