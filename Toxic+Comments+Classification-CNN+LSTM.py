@@ -6,7 +6,6 @@ Created on Wed May 09 10:20:27 2018
 @author: Snigdha Siddula
 """
 
-# In[1]:
 import numpy as np
 import pandas as pd
 import keras
@@ -25,14 +24,10 @@ import tensorflow as tf
 from keras.layers import Embedding
 from keras.layers.recurrent import LSTM
 from keras.layers.convolutional import Conv1D, MaxPooling1D
-
-# In[2]:
 import os
 os.chdir('C:/Users/Snigs/Desktop/INSOFE/day43-CUTe4')
 
 # Data Exploration
-
-# In[3]:
 raw_data = pd.read_csv('CUTe_data.csv',encoding='latin-1')
 print('Data.Shape:',raw_data.shape)
 print('\n')
@@ -42,7 +37,6 @@ print('Data Types:\n',raw_data.dtypes)
 print('\n')
 print(raw_data.head())
 
-# In[4]:
 # Print the unique classes and their counts/frequencies
 hate_speech = np.unique(raw_data['hate_speech'], return_counts=True) # np.unique returns a tuple with class names and counts
 print('hate_speech:')
@@ -62,34 +56,25 @@ print(insult[0])
 print(insult[1])
 
 # Train Test Split
-
-# In[5]:
 x = raw_data[['text']]
 y = raw_data[['hate_speech','obscene','insulting']]
 
-# In[6]:
 # Splitting data
 x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.20)
 x_train.head()
-
-# In[7]:
 y_train.head()
-# ### Text Preprocessing
 
-# In[8]:
+# Text Preprocessing
 from nltk.corpus import stopwords
 stop = stopwords.words('english')
 x_train['text'] = x_train['text'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
 x_train.head()
 
-# In[9]:
 from textblob import Word
 x_train['text'] = x_train['text'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
 x_train.head()
 
-# In[10]:
 # Converting source x data as per model intake compatibility
-
 tokenize = Tokenizer(num_words=20000) # takes top 20000 frequenct words
 tokenize.fit_on_texts(x_train.text) # taking the most frequenct words from train data
 
@@ -104,7 +89,6 @@ print('unique tokens:', len(x_wordindex))
 print(traindata_x.shape)
 print(testdata_x.shape)
 
-# In[11]:
 # defining custom metrics as demanded.
 from keras import backend as K
 def recall(y_true, y_pred):
@@ -114,9 +98,7 @@ def recall(y_true, y_pred):
     return recall
 
 
-# ### Model Building
-
-# In[19]:
+# Model Building
 # Building an CNN-LSTM model
 model = Sequential()
 model.add(Embedding(input_dim=len(x_wordindex), 
@@ -131,7 +113,6 @@ model.add(Dense(3, activation='sigmoid')) # a neuron per class in the o/p layer
 model.summary()
 
 
-# In[14]:
 # Mention the optimizer, Loss function and metrics to be computed
 model.compile(optimizer='adam',  # 'Adam' is a variant of gradient descent technique
               loss='binary_crossentropy', # categorical_crossentropy for multi-class classification
@@ -139,8 +120,6 @@ model.compile(optimizer='adam',  # 'Adam' is a variant of gradient descent techn
 
 history = (model.fit(traindata_x, y_train, epochs=5, validation_split=0.20).history)
 
-
-# In[15]:
 print(history['loss'])
 print(history['acc'])
 print(history['val_loss'])
@@ -159,7 +138,6 @@ plt.show()
     
 model.save_weights('Weights3.h5')
 
-# In[16]:
 # predicting on test
 from numpy import array
 preds = model.predict(testdata_x)
@@ -182,19 +160,14 @@ clabel=clabel.transpose()
 
 print(classification_report(clabel,preds))
 
-
-# In[17]:
-
 clabel = pd.DataFrame(clabel)
 clabel.head()
 
-# In[18]:
 recall_score(clabel,preds,average="weighted")
 
 
-# ### Weighted Recall - Calculation by hand
+# Weighted Recall - Calculation by hand
 
-# In[22]:
 frac_h = 15294/31633
 frac_o = 8449/31633
 frac_i = 7574/31633
@@ -208,9 +181,6 @@ total_wt =wt_h + wt_o + wt_i
 WT_H = wt_h/total_wt
 WT_O = wt_o/total_wt
 WT_I = wt_i/total_wt
-
-
-# In[23]:
 
 # Weighted Recall - update recall as per model predictions
 WT_H*0.94 + WT_O*0.84 + WT_I*0.73
