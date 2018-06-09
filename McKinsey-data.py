@@ -4,11 +4,13 @@
 Created on Wed May 2 12:27:06 2018
 
 @author: Snigdha Siddula
-Impact of Standardization on ML-Classifier's Performance - McKinsey Dataset
+Impact of Standardization on ML-Classifier's Performance - Heart Stroke Risk-factor Analyis
+Recorded time and accuracy with and without standardizing the numerical attributes and following are the observations:
+1. Standardization brings down the convergence time. But this changes as per the ratio of numerical and categorical attributes
+2. Standardization need not necessarily increase the accuracy of the ML-classifier
+3. Standardization significantly helps SVM converge faster
 """
-# In[123]:
-
-
+# import required libraries
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -17,51 +19,22 @@ import time
 from datetime import datetime
 from sklearn import preprocessing
 
-
-# In[124]:
-
-
 # get current working directory
 import os
 os.chdir('C:/Users/Snigs/Desktop/Internship/McKinsey')
 
-
-# In[125]:
-
-
+# read and explore data
 DATA = pd.read_csv("train.csv")
 DATA.shape
-
-
-# In[126]:
-
-
 DATA.head()
-
-
-# In[127]:
-
-
 DATA.dtypes
-
-
-# In[128]:
-
 
 # checking for missing values
 print(DATA.isnull().sum())
 #print(DATA.isnull().sum().sum())
 
-
-# In[129]:
-
-
 # value counts of the target
 DATA['stroke'].value_counts()
-
-
-# In[130]:
-
 
 print(DATA['heart_disease'].value_counts())
 print(DATA['hypertension'].value_counts())
@@ -69,148 +42,83 @@ print(DATA['ever_married'].value_counts())
 print(DATA['work_type'].value_counts())
 print(DATA['Residence_type'].value_counts())
 
-
-# In[131]:
-
-
 # Extracting target and predictors
 y = DATA['stroke']
 y.head()
-
-
-# In[132]:
-
-
 x = DATA[['gender','age','hypertension','heart_disease','ever_married','work_type','Residence_type','avg_glucose_level','bmi']]
 x.head()
-
-
-# In[133]:
-
 
 # Dummy variables for Categorical data
 X = pd.get_dummies(x,columns=['gender','ever_married','work_type','Residence_type'])
 X.head()
 
 
-# ### WITHOUT STANDARDIZATION
-
-# In[134]:
-
+# WITHOUT STANDARDIZATION
 
 # Train Test Split
 from sklearn.cross_validation import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,stratify=y,random_state=123)
-
-
-# ### 1. Logistic Regression
-
-# In[135]:
-
-
+# record time -to check the impact of Standardization on model convergence time
+# 1. Logistic Regression
 from sklearn import linear_model
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import recall_score, precision_score, accuracy_score
-
-
-# In[136]:
-
 
 start_time = time.time()
 logreg_train = linear_model.LogisticRegression()
 lr_model = logreg_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[137]:
-
-
+# predictions and accuracy
 pred_lr_train = lr_model.predict(X_train)
 pred_lr_test = lr_model.predict(X_test)
 accuracy_score(y_test,pred_lr_test)
 
 
-# ### 2. Naive Bayes
-
-# In[138]:
-
-
+# 2. Naive Bayes
 from sklearn.naive_bayes import GaussianNB
-
-
-# In[139]:
-
 
 start_time = time.time()
 nb_train = GaussianNB()
 nb_model = nb_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time -  start_time)
-
-
-# In[140]:
-
-
+# predictions
 pred_nb_train = nb_model.predict(X_train)
 pred_nb_test = nb_model.predict(X_test)
 accuracy_score(y_test,pred_nb_test)
 
 
-# ### 3. Decision Tree
-
-# In[141]:
-
-
+# 3. Decision Tree
 from sklearn import tree
-
-
-# In[142]:
-
 
 start_time = time.time()
 dt = tree.DecisionTreeClassifier()
 dt_model = dt.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[143]:
-
-
+# predictions
 pred_dt_test = dt_model.predict(X_test)
 pred_dt_train = dt_model.predict(X_train)
 accuracy_score(y_test,pred_dt_test)
 
 
-# ### 4. SVM
-
-# In[144]:
-
-
+# 4. SVM
 from sklearn import svm
 start_time = time.time()
 svm = svm.SVC()
 svm_model = svm.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[145]:
-
-
+# predictions
 pred_svm_test = svm_model.predict(X_test)
 pred_svm_train = svm_model.predict(X_train)
 accuracy_score(y_test,pred_svm_test)
 
 
-# ### WITH STANDARDIZATION
+# WITH STANDARDIZATION
 
-# ### Range Scaling
-
-# In[146]:
-
-
+# I. Range Scaling
 from sklearn.preprocessing import MinMaxScaler # subtract min and divide by (max - min)
 start_time = time.time()
 scaler = MinMaxScaler(feature_range=(0, 1))
@@ -218,215 +126,127 @@ rescaledX = scaler.fit_transform(X.iloc[:,3:5])
 end_time = time.time()
 print(end_time - start_time)
 
-
-# In[147]:
-
-
 # summarize transformed data
 np.set_printoptions(precision=3)
 print(rescaledX[0:5,:])
-
-
-# In[148]:
-
 
 # Train Test Split
 from sklearn.cross_validation import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(rescaledX, y, test_size=0.3,stratify=y,random_state=123)
 
 
-# ### 1. Logistic Regression
-
-# In[149]:
-
-
+# 1. Logistic Regression
 start_time = time.time()
 logreg_train = linear_model.LogisticRegression()
 lr_model = logreg_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[150]:
-
-
+# predictions
 pred_lr_train = lr_model.predict(X_train)
 pred_lr_test = lr_model.predict(X_test)
 accuracy_score(y_test,pred_lr_test)
 
 
-# ### 2. Naive Bayes
-
-# In[151]:
-
-
+# 2. Naive Bayes
 start_time = time.time()
 nb_train = GaussianNB()
 nb_model = nb_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time -  start_time)
-
-
-# In[152]:
-
-
+# predictions
 pred_nb_train = nb_model.predict(X_train)
 pred_nb_test = nb_model.predict(X_test)
 accuracy_score(y_test,pred_nb_test)
 
 
-# ### 3. Decision Tree
-
-# In[153]:
-
-
+# 3. Decision Tree
 start_time = time.time()
 dt = tree.DecisionTreeClassifier()
 dt_model = dt.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[154]:
-
-
+# predictions
 pred_dt_test = dt_model.predict(X_test)
 pred_dt_train = dt_model.predict(X_train)
 accuracy_score(y_test,pred_dt_test)
 
 
-# ### 4. SVM
-
-# In[155]:
-
-
+# 4. SVM
 from sklearn import svm
 start_time = time.time()
 svm = svm.SVC()
 svm_model = svm.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[156]:
-
-
+# predictions
 pred_svm_test = svm_model.predict(X_test)
 pred_svm_train = svm_model.predict(X_train)
 accuracy_score(y_test,pred_svm_test)
 
 
-# ### Z-score
-
-# In[157]:
-
-
+# II. Z-score
 from sklearn.preprocessing import StandardScaler # subtract mean and divide by variance
 scaler = StandardScaler().fit(X.iloc[:,3:5])
 standardX = scaler.transform(X.iloc[:,3:5])
 
-
-# In[158]:
-
-
 np.set_printoptions(precision=3)
 print(standardX[0:5,:])
-
-
-# In[159]:
-
 
 # Train Test Split
 from sklearn.cross_validation import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(standardX, y, test_size=0.3,stratify=y,random_state=123)
 
 
-# ### 1. Logistic Regression
-
-# In[160]:
-
-
+# 1. Logistic Regression
 start_time = time.time()
 logreg_train = linear_model.LogisticRegression()
 lr_model = logreg_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[161]:
-
-
+# predicitons
 pred_lr_train = lr_model.predict(X_train)
 pred_lr_test = lr_model.predict(X_test)
 accuracy_score(y_test,pred_lr_test)
 
 
-# ### 2. Naive Bayes
-
-# In[162]:
-
-
+# 2. Naive Bayes
 start_time = time.time()
 nb_train = GaussianNB()
 nb_model = nb_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time -  start_time)
-
-
-# In[163]:
-
-
+# predicitons
 pred_nb_train = nb_model.predict(X_train)
 pred_nb_test = nb_model.predict(X_test)
 accuracy_score(y_test,pred_nb_test)
 
 
-# ### 3. Decision Tree
-
-# In[164]:
-
-
+# 3. Decision Tree
 start_time = time.time()
 dt = tree.DecisionTreeClassifier()
 dt_model = dt.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[165]:
-
-
+# predictions
 pred_dt_test = dt_model.predict(X_test)
 pred_dt_train = dt_model.predict(X_train)
 accuracy_score(y_test,pred_dt_test)
 
 
-# ### 4. SVM
-
-# In[166]:
-
-
+# 4. SVM
 from sklearn import svm
 start_time = time.time()
 svm = svm.SVC()
 svm_model = svm.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[167]:
-
-
+# predictions
 pred_svm_test = svm_model.predict(X_test)
 pred_svm_train = svm_model.predict(X_train)
 accuracy_score(y_test,pred_svm_test)
 
 
-# ### Normalization
-
-# In[168]:
-
-
+# III. Normalization
 from sklearn.preprocessing import Normalizer # divide by sqrt(sum of squared terms) -> L2 norm
 start_time = time.time()
 scaler = Normalizer().fit(X.iloc[:,3:5])
@@ -434,99 +254,59 @@ normalizedX = scaler.transform(X.iloc[:,3:5])
 end_time = time.time()
 print(end_time - start_time)
 
-
-# In[169]:
-
-
 # summarize transformed data
 np.set_printoptions(precision=3)
 print(normalizedX[0:5,:])
-
-
-# In[170]:
-
 
 # Train Test Split
 from sklearn.cross_validation import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(normalizedX, y, test_size=0.3,stratify=y,random_state=123)
 
 
-# ### 1. Logistic Regression
-
-# In[171]:
-
-
+# 1. Logistic Regression
 start_time = time.time()
 logreg_train = linear_model.LogisticRegression()
 lr_model = logreg_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[172]:
-
-
+# predictions
 pred_lr_train = lr_model.predict(X_train)
 pred_lr_test = lr_model.predict(X_test)
 accuracy_score(y_test,pred_lr_test)
 
 
-# ### 2. Naive Bayes
-
-# In[173]:
-
-
+# 2. Naive Bayes
 start_time = time.time()
 nb_train = GaussianNB()
 nb_model = nb_train.fit(X_train, y_train)
 end_time = time.time()
 print(end_time -  start_time)
-
-
-# In[174]:
-
-
+# predictions
 pred_nb_train = nb_model.predict(X_train)
 pred_nb_test = nb_model.predict(X_test)
 accuracy_score(y_test,pred_nb_test)
 
 
-# ### 3. Decision Tree
-
-# In[175]:
-
-
+# 3. Decision Tree
 start_time = time.time()
 dt = tree.DecisionTreeClassifier()
 dt_model = dt.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[176]:
-
-
+# predictions
 pred_dt_test = dt_model.predict(X_test)
 pred_dt_train = dt_model.predict(X_train)
 accuracy_score(y_test,pred_dt_test)
 
 
-# ### 4. SVM
-
-# In[177]:
-
-
+# 4. SVM
 from sklearn import svm
 start_time = time.time()
 svm = svm.SVC()
 svm_model = svm.fit(X_train, y_train)
 end_time = time.time()
 print(end_time - start_time)
-
-
-# In[178]:
-
-
+# predictions
 pred_svm_test = svm_model.predict(X_test)
 pred_svm_train = svm_model.predict(X_train)
 accuracy_score(y_test,pred_svm_test)
