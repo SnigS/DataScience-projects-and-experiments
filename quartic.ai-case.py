@@ -1,9 +1,6 @@
 
 # coding: utf-8
 
-# In[1]:
-
-
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import KFold
@@ -16,27 +13,15 @@ from sklearn import tree
 from sklearn.metrics import confusion_matrix,recall_score, precision_score, accuracy_score, roc_auc_score
 import os
 
-
-# In[2]:
-
-
 os.chdir("C:/Users/Snigs/Desktop/DS projects/ds_data_big/ds_data")
 
-
-# ### Load data_train
-
-# In[3]:
-
+# Load data_train
 
 # read the train datafile
 TRAIN = pd.read_csv("data_train.csv")
 print("Train Dimensions:",TRAIN.shape)
 print("Train Data:\n", TRAIN.head())
 print("Data Types:\n",TRAIN.dtypes)
-
-
-# In[4]:
-
 
 # checking the class balance of the taget ---> clear imbalance indicated
 print("Target Table:\n",TRAIN['target'].value_counts())
@@ -45,16 +30,9 @@ print("Target Table:\n",TRAIN['target'].value_counts())
 target = TRAIN['target']
 print("Target:\n",target.value_counts())
 
-
-# In[5]:
-
-
 # checking for missing values
 print("Total Missing Values:",TRAIN.isnull().sum().sum())
 print("Missing Values per Feature:\n", TRAIN.isnull().sum())
-
-
-# In[6]:
 
 
 # 69% of cat6 and 44.7% of cat8 values are missing ... hence the columns can be dropped
@@ -63,10 +41,7 @@ train = TRAIN.drop(['id','cat6','cat8','target'],axis=1)
 train.shape
 
 
-# ### Load data_test
-
-# In[7]:
-
+#Load data_test
 
 # read the test datafile
 TEST = pd.read_csv("data_test.csv")
@@ -74,17 +49,9 @@ print("Test Dimensions:", TEST.shape)
 print("Test Data:\n", TEST.head())
 print("Data Types:\n",TEST.dtypes)
 
-
-# In[8]:
-
-
 # checking for missing values
 print("Total Missing Values:",TEST.isnull().sum().sum())
 print("Missing Values per Feature:\n", TEST.isnull().sum())
-
-
-# In[9]:
-
 
 # 69% of cat6 and 44.8% of cat8 values are missing ... hence the columns can be dropped
 # id column has to be dropped too
@@ -92,10 +59,7 @@ test = TEST.drop(['id','cat6','cat8'],axis=1)
 test.shape
 
 
-# ### TRAIN + TEST
-
-# In[10]:
-
+# TT - TRAIN + TEST
 
 # combine train and test by column for the ease of imputing missing values...and then can be separated by the row ids
 TT = pd.concat([train,test])
@@ -103,56 +67,34 @@ print("Train-Test Dimensions:", TT.shape)
 print("Train-Test Data:\n", TT.head())
 print("Train-Test Data Types:\n",TT.dtypes)
 
-
-# In[11]:
-
-
 # checking for missing values
 print("Total Missing Values:",TT.isnull().sum().sum())
 print("Missing Values per Feature:\n",TT.isnull().sum())
 
 
-# #### Dealing with Missing Values
+# Dealing with Missing Values
 
 # #from fancyimpute import KNN
 # #tt_noNA = KNN(k=3).complete(tt)
 
-# In[12]:
-
-
 # imputing missing values
 TT_noNA = TT.apply(lambda x:x.fillna(x.value_counts().index[0]))
-
-
-# In[13]:
-
 
 # checking for the total missing values post imputation ... should be 0
 TT_noNA.isnull().sum().sum()
 
 
-# ### Splitting tt (Train-Test) to their original dimensions
-
-# In[14]:
-
-
+# Splitting tt (Train-Test) to their original dimensions
 # train data without missing values
 train_noNA = TT_noNA.iloc[0:596000,:]
 train_noNA.shape
-
-
-# In[15]:
-
 
 # test data without missing values
 test_noNA = TT_noNA.iloc[596000:1488816,:]
 test_noNA.shape
 
 
-# ### SMOTE - oversampling the minority class to make up for the class imbalanced target
-
-# In[16]:
-
+# SMOTE - oversampling the minority class to make up for the class imbalanced target
 
 from imblearn.over_sampling import SMOTE
 from collections import Counter
@@ -161,29 +103,23 @@ X,Y = SMOTE().fit_sample(train_noNA,target)
 print(sorted(Counter(Y).items()))
 
 
-# ### Train-Validation Split
-
-# In[17]:
-
+# Train-Validation Split
 
 from sklearn.cross_validation import train_test_split
 
 x_train, x_val, y_train, y_val = train_test_split(X,Y, test_size=0.3,random_state=20)
 
 
-# ### K-Fold Cross Validation
-
-# #kf = KFold(n_splits=5, random_state=None, shuffle=False) 
+# K-Fold Cross Validation
+# kf = KFold(n_splits=5, random_state=None, shuffle=False) 
 # 
-# #for train_index, test_index in kf.split(X):
+# for train_index, test_index in kf.split(X):
 #     print("Train:", train_index, "Validation:",test_index)
 #     x_train, x_val = X[train_index], X[test_index] 
 #     y_train, y_val = Y[train_index], Y[test_index]
 
-# ### Classification Modelling
 
-# In[18]:
-
+# Classification Modelling
 
 #1. Logistic Regression
 
@@ -201,8 +137,6 @@ print('Precision:',precision_score(y_val,pred_lr_val))
 
 print('AUC-ROC:',roc_auc_score(y_val,pred_lr_val))
 
-
-# In[19]:
 
 
 #2. Naive Bayes
@@ -222,8 +156,6 @@ print('Precision:',precision_score(y_val,pred_nb_val))
 print('AUC-ROC:',roc_auc_score(y_val,pred_nb_val))
 
 
-# In[20]:
-
 
 #3. Decision Tree
 
@@ -241,8 +173,6 @@ print('Precision:',precision_score(y_val,pred_dt_val))
 
 print('AUC-ROC:',roc_auc_score(y_val,pred_dt_val))
 
-
-# In[21]:
 
 
 #4. Random Forest
@@ -263,17 +193,10 @@ print('Precision:',precision_score(y_val,pred_rf_val))
 print('AUC-ROC:',roc_auc_score(y_val,pred_rf_val))
 
 
-# ### Predicitons on Test dataset
-
-# In[22]:
-
+# Predicitons on Test dataset
 
 target = dt_model.predict(test_noNA)
 target = pd.DataFrame(target, columns =['target'])
-
-
-# In[23]:
-
 
 # getting the id column from test data set
 id = TEST['id']
@@ -284,7 +207,7 @@ test_target = pd.concat(objs=[id, target], axis=1)
 test_target.to_csv('test_target.csv',index=False)
 
 
-# ### Positives(1s) predicted on the test from the above Classification Models:
+# Positives(1s) predicted on the test from the above Classification Models:
 # The observed positives(=1) in the data_train is 3.64%
 # 1. logistic regression ~ 352025
 # 2. Naive Bayes ~ 375976
